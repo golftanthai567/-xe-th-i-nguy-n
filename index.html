@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Đỗ xe Thái Nguyên</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{font:14px/1.4 system-ui,"Segoe UI",Roboto,sans-serif;color:#222;display:flex;flex-direction:column}
+header{height:56px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.12);z-index:5}
+.brand{font-weight:700;color:#0a4d9f;line-height:1.15}.brand small{display:block;color:#e8590c;font-size:12px;letter-spacing:.5px}
+nav a{margin-left:22px;color:#222;text-decoration:none;padding-bottom:4px}nav a.on{color:#0a4d9f;border-bottom:2px solid #0a4d9f}
+.app{flex:1;display:grid;grid-template-columns:340px 1fr;min-height:0}
+aside{display:flex;flex-direction:column;min-height:0;background:#fff;border-right:1px solid #e5e7eb}
+.tabs{display:flex;flex:none}.tabs button{flex:1;border:0;padding:14px 4px;font:700 12px inherit;letter-spacing:.5px;background:#f3f4f6;color:#9aa1ab;cursor:pointer}
+.tabs button.on{background:#0a4d9f;color:#fff}
+.pane{display:none;flex:1;min-height:0;flex-direction:column}.pane.on{display:flex}
+.top{padding:12px;flex:none;border-bottom:1px solid #eee}
+.top input[type=search]{width:100%;padding:10px 12px;border:1px solid #d9dce1;border-radius:6px;font:inherit}
+.ck{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px}.ck label{display:flex;align-items:center;gap:5px;cursor:pointer}
+.ck i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.ttl{padding:10px 14px;font-weight:600;flex:none}
+.list{flex:1;overflow:auto;padding:0 12px 12px}
+.it{display:flex;gap:10px;align-items:center;padding:10px;margin-bottom:8px;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.15);cursor:pointer;background:#fff}
+.it:hover{background:#f3f8ff}.ic{flex:none;width:36px;height:36px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px}
+.it b{display:block;font-size:13px;text-transform:uppercase}.it span{font-size:12px}
+.scroll{overflow:auto;padding:12px;flex:1}
+.mapw{position:relative;min-height:0}#map{position:absolute;inset:0}
+.legend{position:absolute;top:12px;right:12px;z-index:500;background:#fff;border-radius:6px;box-shadow:0 1px 6px rgba(0,0,0,.25);padding:10px 14px;font-size:13px;display:none}
+.leaflet-tooltip.lbl{background:rgba(255,255,255,.92);color:#222;border:1px solid rgba(0,0,0,.25);border-radius:4px;padding:1px 5px;font:600 11px/1.3 system-ui,sans-serif;box-shadow:none;white-space:nowrap}
+.leaflet-tooltip.lbl:before{display:none}.leaflet-tooltip.sn{font-style:italic;background:rgba(255,248,214,.95)}
+.legend h4{margin:0 0 6px}.legend div{display:flex;align-items:center;gap:8px;margin:4px 0}.legend s{display:inline-block;width:32px;height:0;border-top:3px solid}
+.btn{display:inline-block;padding:9px 14px;border-radius:6px;background:#0a4d9f;color:#fff;cursor:pointer}
+table{border-collapse:collapse;width:100%;font-size:12px;margin:6px 0 12px}th,td{border:1px solid #e5e7eb;padding:4px 6px;text-align:left}th{background:#f3f4f6}
+tr.go{cursor:pointer}tr.go:hover{background:#eef5ff}.mu{color:#6b7280;font-size:12px}
+@media(max-width:760px){.app{grid-template-columns:1fr;grid-template-rows:50vh 1fr}.mapw{order:-1}nav{display:none}}
+</style></head><body>
+<header><div class="brand">ĐỖ XE THÁI NGUYÊN<small>BÃI ĐỖ · CẤM ĐỖ · DỊCH VỤ Ô TÔ</small></div><nav><a class="on">Bản đồ</a></nav></header>
+<div class="app">
+<aside>
+<div class="tabs"><button class="on" data-t="p1">DỊCH VỤ</button><button data-t="p2">CẤM ĐỖ XE</button><button data-t="p3">ĐỐI CHIẾU</button></div>
+<div class="pane on" id="p1">
+<div class="top"><input type="search" id="q" placeholder="Tìm kiếm trên bản đồ"><div class="ck" id="ck"></div></div>
+<div class="ttl" id="ttl">Danh sách</div><div class="list" id="list"></div></div>
+<div class="pane" id="p2"><div class="list" id="rl" style="flex:none;max-height:58%;padding-top:10px;border-bottom:1px solid #eee"><div class="mu">Đang tải hình dạng đường từ OpenStreetMap…</div></div><div class="top"><label class="btn">📂 Nạp file GeoJSON cấm đỗ<input type="file" id="gj" accept=".geojson,.json" hidden></label>
+<div class="mu" style="margin-top:8px">Mỗi đoạn đường cần thuộc tính <b>ten</b> và <b>loai</b>: cam_dung_do · cam_do · chan_le · loai_xe</div></div>
+<div class="ttl" id="bttl">Danh sách cấm đỗ xe (0)</div><div class="list" id="blist"><div class="mu" style="padding:6px">Chưa có dữ liệu. Nạp file danh sách từ Sở Xây dựng để hiển thị.</div></div></div>
+<div class="pane" id="p3"><div class="scroll" id="cmp"><div class="mu">Đang chờ dữ liệu OSM…</div></div></div>
+</aside>
+<div class="mapw"><div id="map"></div>
+<div class="legend" id="lg"><h4>Chú thích</h4><div><s style="border-color:#e8193c"></s>Cấm dừng và đỗ</div><div><s style="border-color:#f08c00"></s>Cấm đỗ xe</div><div><s style="border-color:#2b2d9c"></s>Cấm đỗ ngày chẵn lẻ</div><div><s style="border-top-style:dotted;border-color:#222"></s>Cấm đỗ theo loại xe</div></div></div>
+</div>
+<script>
+var C={park:['Bãi đỗ xe','#0a4d9f','P'],fuel:['Cây xăng','#e8590c','⛽'],ev:['Trạm sạc EV','#2f9e44','⚡'],repair:['Gara / sửa xe','#7048e8','🔧'],show:['Showroom','#c2255c','🚘']};
+// Điểm tham chiếu từ Google Maps (chỉ để đối chiếu nội bộ)
+var G=[['park','Bãi giữ xe ô tô (32 Chu Văn An)',21.59228,105.82935],['park','Bãi trông xe ông Chòi',21.59068,105.84749],['park','Gửi xe qua đêm Huyền Trang',21.58661,105.83115],['park','Bãi giữ xe Phong Tuyết',21.58871,105.8432],
+['fuel','Petrolimex Store 61',21.5922,105.85503],['fuel','Petrolimex Store 05',21.59817,105.83641],['fuel','Petrolimex số 62 Thịnh Đán',21.56072,105.80321],['fuel','Petrolimex Store 24',21.57487,105.81331],['fuel','Petrolimex Store 10',21.58516,105.84818],['fuel','CHXD X73 Quân khu 1',21.58141,105.81849],['fuel','CHXD Số 1 (309 Lương Ngọc Quyến)',21.59315,105.82547],['fuel','CHXD số 1 Nam Việt',21.60179,105.83723],['fuel','Cây xăng Quang Vinh',21.60491,105.81809],['fuel','PVOIL Tân Thịnh',21.5751,105.82925],
+['ev','PVOIL Tân Thịnh (sạc EV)',21.5751,105.82925],['ev','VinFast 246 Z115',21.582,105.81271],['ev','VinFast Quyết Thắng',21.57022,105.80942],['ev','VinFast GO! Thái Nguyên',21.57179,105.83511],['ev','VinFast Bưu điện CMT8',21.59387,105.84019],['ev','VinFast 82 Xuân Hòa',21.58578,105.85315],
+['repair','Michelin Car Service - Hunter Mai Linh',21.58009,105.84236],['repair','Gara Hunter Mai Linh CS2',21.5798,105.84252],['repair','Garage Ô tô Việt Bắc',21.58457,105.85199],['repair','Gara Diễn Trang',21.58828,105.84257],['repair','Garage Minh Hiếu',21.59191,105.83703],['repair','Gara Thành Tâm',21.57885,105.84369],['repair','Gara Duyên Hải',21.58342,105.84411],['repair','Gara Khánh Duy',21.57917,105.82868],
+['show','Ford Thái Nguyên',21.56246,105.85498],['show','Toyota Thái Nguyên',21.5605,105.85534],['show','Kia Thái Nguyên',21.58076,105.83636],['show','BMW Thái Nguyên',21.58022,105.8359],['show','Honda Ôtô Thái Nguyên',21.56136,105.85531],['show','Hồng Phương Auto (xe cũ)',21.61029,105.81064],['show','Salon ô tô Tùng Bách (xe cũ)',21.57456,105.80797]];
+var BT={cam_dung_do:['Cấm dừng và đỗ','#e8193c',''],cam_do:['Cấm đỗ xe','#f08c00',''],chan_le:['Cấm đỗ ngày chẵn lẻ','#2b2d9c',''],loai_xe:['Cấm đỗ theo loại xe','#222','4 8']};
+var map=L.map('map',{zoomControl:true}).setView([21.5928,105.8442],14);
+var esri=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Tiles © Esri'}).addTo(map);
+var osm=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'});
+var sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Tiles © Esri'});
+L.control.layers({'Bản đồ đường':esri,'OpenStreetMap':osm,'Vệ tinh':sat},null,{position:'bottomright'}).addTo(map);
+var te=0,tl=0;[esri,osm,sat].forEach(function(l){l.on('tileload',function(){tl++});l.on('tileerror',function(){te++;if(te>6&&!tl){var d=document.getElementById('tmsg');if(!d){d=document.createElement('div');d.id='tmsg';d.style.cssText='position:absolute;z-index:600;left:50%;top:50%;transform:translate(-50%,-50%);background:#fff;padding:14px 18px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.3);max-width:320px;text-align:center';d.innerHTML='Không tải được ảnh bản đồ nền.<br>Hãy mở trang bằng trình duyệt thường (không phải khung xem trước), kiểm tra mạng, hoặc chọn nguồn khác ở nút lớp bản đồ góc phải dưới.';document.querySelector('.mapw').appendChild(d)}}})});
+var ML=L.layerGroup().addTo(map),BL=L.layerGroup().addTo(map),OSM=[],on={park:1,fuel:1,ev:1,repair:1,show:1,g:0},IT=[];
+function $(i){return document.getElementById(i)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function nm(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').toLowerCase()}
+function dm(a,b,c,d){var r=Math.PI/180,x=(d-b)*r*Math.cos((a+c)*r/2),y=(c-a)*r;return Math.sqrt(x*x+y*y)*6371000}
+function cat(t){if(t.amenity=='parking')return 'park';if(t.amenity=='fuel')return 'fuel';if(t.amenity=='charging_station')return 'ev';if(t.shop=='car_repair')return 'repair';if(t.shop=='car')return 'show'}
+// bộ lọc
+$('ck').innerHTML=Object.keys(C).map(function(k){return '<label><input type="checkbox" data-k="'+k+'" checked><i style="background:'+C[k][1]+'"></i>'+C[k][0]+'</label>'}).join('')+'<label><input type="checkbox" data-k="g"> ◇ Điểm Google</label>';
+$('ck').onchange=function(e){on[e.target.dataset.k]=e.target.checked?1:0;render()};$('q').oninput=render;
+document.querySelectorAll('.tabs button').forEach(function(b){b.onclick=function(){document.querySelectorAll('.tabs button').forEach(function(x){x.classList.remove('on')});b.classList.add('on');document.querySelectorAll('.pane').forEach(function(p){p.classList.remove('on')});$(b.dataset.t).classList.add('on');$('lg').style.display=b.dataset.t=='p2'?'block':'none'}});
+function render(){var q=nm($('q').value),a=[];
+OSM.forEach(function(e){a.push({c:e.c,n:e.n||'(chưa có tên)',la:e.la,lo:e.lo,s:'osm',t:e.t})});
+if(on.g)G.forEach(function(g){a.push({c:g[0],n:g[1],la:g[2],lo:g[3],s:'g',t:{}})});
+IT=a.filter(function(x){return on[x.c]&&(!q||nm(x.n).indexOf(q)>=0)});ML.clearLayers();
+IT.forEach(function(x){var m=x.s=='g'?L.marker([x.la,x.lo],{icon:L.divIcon({className:'',iconSize:[26,26],html:'<div style="width:26px;height:26px;border-radius:50%;background:'+C[x.c][1]+';border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.5);color:#fff;text-align:center;line-height:22px;font-size:13px">'+C[x.c][2]+'</div>'})}):L.circleMarker([x.la,x.lo],{radius:8,color:'#fff',weight:2,fillColor:C[x.c][1],fillOpacity:1});
+var t=x.t;m.bindPopup('<b>'+esc(x.n)+'</b><br>'+C[x.c][0]+(x.s=='g'?' · Google':'')+(t.opening_hours?'<br>Giờ: '+esc(t.opening_hours):'')+(t.fee?'<br>Thu phí: '+esc(t.fee):'')+(t.capacity?'<br>Sức chứa: '+esc(t.capacity):'')+'<br><a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination='+x.la+','+x.lo+'">Chỉ đường ↗</a>').addTo(ML);x.m=m});
+$('ttl').textContent='Danh sách ('+IT.length+')';
+$('list').innerHTML=IT.slice(0,300).map(function(x,i){return '<div class="it" data-i="'+i+'"><div class="ic" style="background:'+C[x.c][1]+'">'+C[x.c][2]+'</div><div><b>'+esc(x.n)+'</b><span style="color:'+C[x.c][1]+'">'+C[x.c][0]+(x.s=='g'?' · Google':'')+'</span></div></div>'}).join('')||'<div class="mu" style="padding:6px">Không có kết quả.</div>'}
+$('list').onclick=function(e){var d=e.target.closest('.it');if(!d)return;var x=IT[d.dataset.i];map.setView([x.la,x.lo],17);x.m.openPopup()};
+// cấm đỗ
+var BF=[];
+$('gj').onchange=function(ev){var f=ev.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var j=JSON.parse(r.result);BL.clearLayers();BF=[];
+L.geoJSON(j,{style:function(ft){var b=BT[(ft.properties||{}).loai]||BT.cam_do;return {color:b[1],weight:5,dashArray:b[2]}},onEachFeature:function(ft,l){var p=ft.properties||{};l.bindPopup('<b>'+esc(p.ten||'Đoạn đường')+'</b><br>'+esc((BT[p.loai]||BT.cam_do)[0])+(p.ghi_chu?'<br>'+esc(p.ghi_chu):''));BF.push({l:l,p:p});l.addTo(BL)}});
+$('bttl').textContent='Danh sách cấm đỗ xe ('+BF.length+')';
+$('blist').innerHTML=BF.map(function(x,i){var b=BT[x.p.loai]||BT.cam_do;return '<div class="it" data-i="'+i+'"><div class="ic" style="background:'+b[1]+'">⛔</div><div><b>'+esc(x.p.ten||'Đoạn đường')+'</b><span style="color:'+b[1]+'">'+b[0]+'</span></div></div>'}).join('');
+if(BF.length)map.fitBounds(BL.getBounds())}catch(e){alert('File GeoJSON không hợp lệ')}};r.readAsText(f)};
+$('blist').onclick=function(e){var d=e.target.closest('.it');if(!d)return;var x=BF[d.dataset.i];map.fitBounds(x.l.getBounds());x.l.openPopup()};
+// đối chiếu
+function compare(){var T=150,ok=50,s={},gr=[],used={};Object.keys(C).forEach(function(k){s[k]={g:0,o:0,m:0,off:0,miss:0,only:0}});OSM.forEach(function(e){s[e.c].o++});
+G.forEach(function(g){var k=g[0],best=null,bd=1e9;s[k].g++;OSM.forEach(function(e,i){if(e.c!=k)return;var d=dm(g[2],g[3],e.la,e.lo);if(d<bd){bd=d;best=i}});
+if(best!=null&&bd<=T){used[best]=1;var st=bd<=ok?'ok':'off';s[k][st=='ok'?'m':'off']++;gr.push({g:g,s:st,d:bd,o:OSM[best]})}else{s[k].miss++;gr.push({g:g,s:'miss'})}});
+var only=OSM.filter(function(e,i){if(used[i])return false;var near=G.some(function(g){return g[0]==e.c&&dm(g[2],g[3],e.la,e.lo)<=T});if(!near)s[e.c].only++;return !near});
+var h='<b>So sánh OSM ↔ Google</b> <span class="mu">(khớp ≤'+T+' m)</span><table><tr><th>Nhóm</th><th>GG</th><th>OSM</th><th>Khớp</th><th>Lệch</th><th>Thiếu OSM</th><th>Chỉ OSM</th></tr>';
+Object.keys(C).forEach(function(k){var x=s[k];h+='<tr><td>'+C[k][0]+'</td><td>'+x.g+'</td><td>'+x.o+'</td><td>'+x.m+'</td><td>'+x.off+'</td><td>'+x.miss+'</td><td>'+x.only+'</td></tr>'});
+var lb={ok:'✅ Khớp',off:'⚠️ Lệch ',miss:'❌ Thiếu'};h+='</table><b>Điểm Google</b><table>';
+gr.forEach(function(r){h+='<tr class="go" data-la="'+r.g[2]+'" data-lo="'+r.g[3]+'"><td>'+esc(r.g[1])+'</td><td>'+lb[r.s]+(r.s=='off'?Math.round(r.d)+'m':'')+'</td></tr>'});
+h+='</table><b>Chỉ có trên OSM ('+only.length+')</b><table>';only.forEach(function(e){h+='<tr class="go" data-la="'+e.la+'" data-lo="'+e.lo+'"><td>'+esc(e.n||'(chưa có tên)')+'</td><td>'+C[e.c][0]+'</td></tr>'});
+$('cmp').innerHTML=h+'</table><div class="mu">Điểm Google chỉ dùng đối chiếu nội bộ, không công khai.</div>'}
+$('cmp').onclick=function(e){var r=e.target.closest('tr.go');if(r)map.setView([+r.dataset.la,+r.dataset.lo],17)};
+// tải OSM
+function done(){render();compare()}
+function load(){var K='osm_tn_v1',c=null;try{c=JSON.parse(localStorage.getItem(K)||'null')}catch(e){}
+if(c&&Date.now()-c.t<864e5){OSM=c.d;done();return}
+$('ttl').textContent='Đang tải dữ liệu…';
+var b='(21.53,105.76,21.65,105.90)',q='[out:json][timeout:60];(nwr["amenity"="parking"]'+b+';nwr["amenity"="fuel"]'+b+';nwr["amenity"="charging_station"]'+b+';nwr["shop"="car_repair"]'+b+';nwr["shop"="car"]'+b+';);out center tags;';
+fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q),headers:{'Content-Type':'application/x-www-form-urlencoded'}}).then(function(r){return r.json()}).then(function(j){
+OSM=j.elements.map(function(e){var la=e.lat||(e.center&&e.center.lat),lo=e.lon||(e.center&&e.center.lon),t=e.tags||{};return {la:la,lo:lo,t:t,n:t.name||t.brand||t.operator,c:cat(t)}}).filter(function(e){return e.c&&e.la});
+try{localStorage.setItem(K,JSON.stringify({t:Date.now(),d:OSM}))}catch(e){}done()}).catch(function(){$('ttl').textContent='Không tải được dữ liệu. Tải lại trang để thử lại.'})}
+// ===== LỆNH CẤM 25/10 – 08/11/2026 (Nguồn: UBND Phường Phan Đình Phùng) =====
+var D=function(m,d,h,mi){return new Date(2026,m-1,d,h,mi||0)},W4=['Đội Cấn','Hùng Vương','Nguyễn Du','Nha Trang'].map(function(s){return {s:s}}),F30=[[D(10,30,0),D(10,30,23,59)]];
+var RU=[
+{k:4,col:'#1c7ed6',w:16,t:'01–03/11 & 05–06/11 · 18h00–22h30',d:'Cấm mọi phương tiện 2 chiều: Đội Cấn, Hùng Vương, Nguyễn Du, Nha Trang (Chương trình Phố đi bộ).',iv:[1,2,3,5,6].map(function(d){return [D(11,d,18),D(11,d,22,30)]}),sg:W4},
+{k:3,col:'#7048e8',w:11,t:'30/10 · cả ngày (Khai mạc Festival Trà)',d:'Cấm mọi phương tiện: Đội Cấn, Hùng Vương, Nguyễn Du, Nha Trang; Hoàng Văn Thụ (Đảo tròn → ngã tư Minh Cầu); Bắc Kạn (Đảo tròn → ngã tư Bắc Sơn kéo dài).',iv:F30,sg:W4.concat([{s:'Hoàng Văn Thụ',a:'R',b:['Hoàng Văn Thụ','Minh Cầu']},{s:'Bắc Kạn',a:'R',b:['Bắc Kạn','Bắc Sơn']}])},
+{k:5,col:'#c2255c',w:7,dash:'3 9',t:'30/10 · cả ngày · chỉ cấm ô tô',d:'Cầu Bến Tượng → Chợ Thái: từ ngã 3 QL1B cũ/KĐT Đồng Bẩm đến nút Đội Cấn – Bến Oánh (gồm cả cầu Bến Tượng).',iv:F30,sg:[{s:'Bến Tượng',far:3000}]},
+{k:1,col:'#e03131',w:7,t:'25/10 08h00 → 30/10 14h00',d:'Cấm mọi phương tiện: Đội Cấn, đoạn Hùng Vương → Nguyễn Du (chiều Chợ Thái → Đảo tròn Trung tâm).',iv:[[D(10,25,8),D(10,30,14)]],sg:[{s:'Đội Cấn',a:['Đội Cấn','Hùng Vương'],b:'R'}]},
+{k:2,col:'#f08c00',w:3,t:'27/10 08h00 → 08/11 08h00',d:'Cấm mọi phương tiện: Đội Cấn, đoạn Nguyễn Du → Hùng Vương (chiều Đảo tròn Trung tâm → Chợ Thái).',iv:[[D(10,27,8),D(11,8,8)]],sg:[{s:'Đội Cấn',a:['Đội Cấn','Hùng Vương'],b:'R'}]}];
+RU.forEach(function(u){u.w=3;u.o={4:-12,3:-4,1:4,2:12,5:0}[u.k];u.col={4:'#1c7ed6',3:'#9c36b5',1:'#e03131',2:'#f08c00',5:'#0ca678'}[u.k]});
+var RS={4:'01–06/11 tối',3:'30/10',5:'30/10 (ô tô)',1:'25–30/10',2:'27/10–08/11'},LML=L.layerGroup().addTo(map),LMS=[];
+function off(r,m){if(!m)return r;return r.map(function(p,i){var a=r[Math.max(i-1,0)],b=r[Math.min(i+1,r.length-1)],c=Math.cos(p[0]*Math.PI/180),dx=(b[1]-a[1])*c,dy=b[0]-a[0],l=Math.sqrt(dx*dx+dy*dy)||1;return [p[0]+dx/l*m/111320,p[1]-dy/l*m/(111320*c)]})}
+function ov(q,i){var E=['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter','https://overpass.private.coffee/api/interpreter'];return fetch(E[i],{method:'POST',body:'data='+encodeURIComponent(q),headers:{'Content-Type':'application/x-www-form-urlencoded'}}).then(function(r){if(!r.ok)throw 0;return r.json()}).catch(function(){if(i+1<E.length)return ov(q,i+1);throw 0})}
+function runsOf(u,R){var out=[];u.sg.forEach(function(g){var A=g.a?(g.a=='R'?R:J(g.a)):null,B=g.b?(g.b=='R'?R:J(g.b)):null;ways(g.s).forEach(function(w){var run=[];function fl(){if(run.length>1)out.push(run);run=[]}w.forEach(function(p){var ok=A&&B?dm(p[0],p[1],A[0],A[1])+dm(p[0],p[1],B[0],B[1])<=dm(A[0],A[1],B[0],B[1])*1.2+30:dm(p[0],p[1],R[0],R[1])<=(g.far||1000);if(ok)run.push(p);else fl()});fl()})});return out}
+function lmType(t){if(t.tourism=='museum')return 'Bảo tàng';if(t.tourism=='gallery')return 'Phòng tranh';if(t.tourism=='viewpoint')return 'Điểm ngắm cảnh';if(t.tourism=='zoo')return 'Sở thú';if(t.tourism=='theme_park')return 'Công viên giải trí';if(t.tourism)return 'Điểm tham quan';if(t.historic)return 'Di tích';if(t.leisure=='park')return 'Công viên';if(t.amenity=='marketplace')return 'Chợ';if(t.amenity=='theatre'||t.amenity=='arts_centre')return 'Văn hóa – nghệ thuật';if(t.shop=='mall')return 'Trung tâm thương mại';return 'Địa điểm'}
+function lmPop(m){return '<b>'+esc(m.n)+'</b><br>'+m.y+(m.nr.length?'<br>⚠ Gần đoạn cấm: '+m.nr.join(', '):'<br>Không nằm gần đoạn cấm')+'<br><a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination='+m.la+','+m.lo+'">Chỉ đường ↗</a>'}
+function lmT(on){on?map.addLayer(LML):map.removeLayer(LML)}
+function lmGo(i){map.setView([LMS[i].la,LMS[i].lo],17);LMS[i].mk.openPopup()}
+function lmDraw(){LML.clearLayers();var h='<hr style="border:0;border-top:1px solid #eee"><label><input type="checkbox" id="lmk" checked onchange="lmT(this.checked)"> <b>Địa điểm nổi bật trong bán kính 2 km</b></label><div class="mu">Dữ liệu OSM · tính từ nút giao Đội Cấn – Nguyễn Du</div>';
+LMS.forEach(function(m,i){m.mk=L.marker([m.la,m.lo],{icon:L.divIcon({className:'',iconSize:[22,22],html:'<div style="width:22px;height:22px;border-radius:50%;background:#f59f00;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.5);color:#fff;text-align:center;line-height:18px;font-size:12px">★</div>'})}).bindPopup(lmPop(m)).bindTooltip(esc(m.n),{permanent:true,direction:'right',offset:[10,0],className:'lbl'}).addTo(LML);
+h+='<div class="it" style="box-shadow:none;border:1px solid #eee;padding:6px 8px;margin:6px 0" onclick="lmGo('+i+')"><div><b>'+esc(m.n)+'</b><div class="mu">'+m.y+' · '+(m.d/1000).toFixed(1)+' km</div>'+(m.nr.length?'<div style="color:#e03131;font-size:12px">⚠ Gần đoạn cấm: '+m.nr.join(', ')+'</div>':'')+'</div></div>'});
+$('lm').innerHTML=h}
+var NL=L.layerGroup().addTo(map);
+function nameLabels(R){NL.clearLayers();var u=RU.filter(function(x){return x.k==3})[0];if(!u)return;
+u.sg.forEach(function(g){var rs=runsOf({sg:[g]},R),best=null;rs.forEach(function(r){if(!best||r.length>best.length)best=r});if(!best)return;var p=best[Math.floor(best.length/2)];
+L.marker(p,{opacity:0,interactive:false}).bindTooltip(g.s,{permanent:true,direction:'top',offset:[0,-4],className:'lbl sn'}).addTo(NL)})}
+function loadLM(R){nameLabels(R);var a='(around:2000,'+R[0]+','+R[1]+')',q='[out:json][timeout:60];(nwr'+a+'["name"]["tourism"~"attraction|museum|gallery|viewpoint|zoo|theme_park"];nwr'+a+'["name"]["historic"];nwr'+a+'["name"]["leisure"="park"];nwr'+a+'["name"]["amenity"~"marketplace|theatre|arts_centre"];nwr'+a+'["name"]["shop"="mall"];);out center tags 200;';
+ov(q,0).then(function(j){var seen={};LMS=[];j.elements.forEach(function(e){var t=e.tags||{},la=e.lat||(e.center&&e.center.lat),lo=e.lon||(e.center&&e.center.lon);if(!la||seen[t.name])return;seen[t.name]=1;LMS.push({n:t.name,y:lmType(t),la:la,lo:lo,d:dm(R[0],R[1],la,lo)})});
+LMS.sort(function(a,b){return a.d-b.d});LMS=LMS.slice(0,40);var runs={};RU.forEach(function(u){runs[u.k]=runsOf(u,R)});
+LMS.forEach(function(m){m.nr=[];RU.forEach(function(u){var md=1e9;runs[u.k].forEach(function(r){r.forEach(function(p){var d=dm(m.la,m.lo,p[0],p[1]);if(d<md)md=d})});if(md<=300)m.nr.push(RS[u.k]+' ('+Math.round(md)+' m)')})});lmDraw()}).catch(function(){$('lm').innerHTML='<div class="mu">Không tải được địa điểm nổi bật. Tải lại trang để thử lại.</div>'})}
+var NS=['Đội Cấn','Hùng Vương','Nguyễn Du','Nha Trang','Hoàng Văn Thụ','Bắc Kạn','Bắc Sơn','Minh Cầu','Bến Tượng','Bến Oánh'],RW={},RL=L.layerGroup().addTo(map);
+function ways(n){return RW[n]||[]}
+function J(p){var best=null,bd=1e12;ways(p[0]).forEach(function(w){w.forEach(function(a){ways(p[1]).forEach(function(v){v.forEach(function(b){var d=dm(a[0],a[1],b[0],b[1]);if(d<bd){bd=d;best=[(a[0]+b[0])/2,(a[1]+b[1])/2]}})})})});return best}
+function act(u,at){return !!at&&u.iv.some(function(i){return at>=i[0]&&at<=i[1]})}
+function pad(n){return (n<10?'0':'')+n}
+function drawR(){RL.clearLayers();var R=J(['Đội Cấn','Nguyễn Du']);if(!R){$('rmsg').textContent='Chưa tìm thấy đường Đội Cấn / Nguyễn Du trong dữ liệu OSM.';return}
+var at=$('rt').value?new Date($('rt').value):null,flt=$('rf').checked;
+RU.slice().sort(function(a,b){return b.w-a.w}).forEach(function(u){var a=act(u,at);$('b'+u.k).style.display=a?'inline':'none';if(!$('c'+u.k).checked||(flt&&!a))return;
+u.sg.forEach(function(g){var A=g.a?(g.a=='R'?R:J(g.a)):null,B=g.b?(g.b=='R'?R:J(g.b)):null;
+ways(g.s).forEach(function(w){var run=[];function fl(){if(run.length>1)L.polyline(off(run,u.o),{color:u.col,weight:3,opacity:.95,dashArray:u.dash,lineCap:'butt'}).bindPopup('<b>'+u.t+'</b><br>'+u.d).addTo(RL);run=[]}
+w.forEach(function(p){var ok=A&&B?dm(p[0],p[1],A[0],A[1])+dm(p[0],p[1],B[0],B[1])<=dm(A[0],A[1],B[0],B[1])*1.2+30:dm(p[0],p[1],R[0],R[1])<=(g.far||1000);if(ok)run.push(p);else fl()});fl()})})})}
+function buildR(){var n=new Date(),h='<b>Lệnh cấm 25/10 – 08/11/2026</b><div class="mu">Nguồn: UBND Phường Phan Đình Phùng</div><div style="margin:8px 0"><input type="datetime-local" id="rt" value="'+n.getFullYear()+'-'+pad(n.getMonth()+1)+'-'+pad(n.getDate())+'T'+pad(n.getHours())+':'+pad(n.getMinutes())+'" style="padding:6px;border:1px solid #d9dce1;border-radius:6px"> <label><input type="checkbox" id="rf"> chỉ hiện lệnh đang cấm</label></div><div id="rmsg" class="mu"></div>';
+RU.slice().sort(function(a,b){return a.k-b.k}).forEach(function(u){h+='<div style="display:flex;gap:8px;margin:8px 0;align-items:flex-start"><input type="checkbox" id="c'+u.k+'" checked style="margin-top:3px"><i style="flex:none;width:26px;height:0;border-top:'+Math.max(3,Math.min(u.w,8))+'px '+(u.dash?'dotted':'solid')+' '+u.col+';margin-top:7px"></i><div><b style="font-size:13px">'+u.t+'</b> <span id="b'+u.k+'" style="display:none;background:#e03131;color:#fff;border-radius:8px;padding:0 6px;font-size:11px">đang cấm</span><div class="mu">'+u.d+'</div></div></div>'});
+h+='<div class="mu">Ngoài ra 25/10 và 27/10: tạm cấm, phân luồng ô tô, xe máy (chưa nêu rõ tuyến). Các đoạn vẽ ở đây là ước lượng từ OSM, cần đối chiếu thông báo chính thức.</div><div id="lm"><div class="mu" style="margin-top:8px">Đang tải địa điểm nổi bật…</div></div>';
+$('rl').innerHTML=h;$('rl').onchange=drawR;
+$('lg').innerHTML='<h4>Lệnh cấm 25/10–08/11/2026</h4>'+RU.slice().sort(function(a,b){return a.k-b.k}).map(function(u){return '<div style="max-width:250px"><s style="flex:none;width:30px;border-top:'+Math.max(3,Math.min(u.w,8))+'px '+(u.dash?'dotted':'solid')+' '+u.col+'"></s>'+u.t+'</div>'}).join('')}
+function loadR(){buildR();try{var cc=JSON.parse(localStorage.getItem('rw1')||'null');if(cc&&Date.now()-cc.t<6048e5){RW=cc.d;$('rmsg').textContent='Dữ liệu đường: dùng bản đã lưu trong máy';drawR();var R0=J(['Đội Cấn','Nguyễn Du']);if(R0){map.setView(R0,17);loadLM(R0)}return}}catch(e){}var re=NS.join('|'),q='[out:json][timeout:60];way["highway"]["name"~"'+re+'",i](21.55,105.80,21.64,105.90);out geom;';
+function ov(q,i){var E=['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter','https://overpass.private.coffee/api/interpreter'];return fetch(E[i],{method:'POST',body:'data='+encodeURIComponent(q),headers:{'Content-Type':'application/x-www-form-urlencoded'}}).then(function(r){if(!r.ok)throw 0;return r.json()}).catch(function(){if(i+1<E.length)return ov(q,i+1);throw 0})}
+ov(q,0).then(function(j){
+j.elements.forEach(function(e){var t=nm((e.tags||{}).name),g=(e.geometry||[]).map(function(p){return [p.lat,p.lon]});if(g.length<2)return;for(var i=0;i<NS.length;i++){if(t.indexOf(nm(NS[i]))>=0){(RW[NS[i]]=RW[NS[i]]||[]).push(g);break}}});
+$('rmsg').innerHTML='Dữ liệu đường OSM: '+NS.map(function(n){var c=ways(n).length;return c?n+' ('+c+')':'<b style="color:#e03131">'+n+' (không thấy)</b>'}).join(' · ');
+try{localStorage.setItem('rw1',JSON.stringify({t:Date.now(),d:RW}))}catch(e){}drawR();var R=J(['Đội Cấn','Nguyễn Du']);if(R){map.setView(R,17);loadLM(R)}}).catch(function(er){$('rmsg').textContent='Lỗi: '+(er&&er.message?er.message:'không tải được hình dạng đường từ OSM')+'. Tải lại trang (Ctrl+F5) để thử lại.'})}
+render();load();loadR();document.querySelector('[data-t=p2]').click();
+</script></body></html>
