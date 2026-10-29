@@ -52,7 +52,17 @@ aside.open{transform:none}
 #dp.c .dl{display:none}#dp.c .ds{display:inline!important}#dp.c>*:not(#dph):not(#hd){display:none!important}#dp.c #dph{margin:0}
 .legend{left:8px;bottom:calc(66px + env(safe-area-inset-bottom));max-width:62%;max-height:34%}
 #bm{right:8px!important;bottom:calc(66px + env(safe-area-inset-bottom))!important}.bb{padding:5px 8px;font-size:11px}
-.leaflet-tooltip.lbl{font-size:9.5px;padding:0 3px}.tabs{height:44px}.tabs button{height:44px;padding:0;font-size:11px}}
+.leaflet-tooltip.lbl{font-size:9.5px;padding:0 3px}.tabs{height:44px}.tabs button{height:44px;padding:0;font-size:11px}
+#dp{font-size:8.5px!important;padding:4px 6px!important;border-radius:6px!important}
+#dp #dph{margin-bottom:3px!important}#dp.c #dph{margin:0!important}
+#dp input{padding:2px 4px!important;font-size:9px!important;border-radius:4px!important}
+#dp #rq{font-size:8px!important;margin-top:3px!important;line-height:1.3}
+#dp #dpc{font-size:8px!important;padding:2px 7px!important;margin-top:3px!important;border-radius:4px!important}
+#hd,#sh{width:18px!important;height:32px!important;font-size:15px!important;padding:0 0 2px!important;border-radius:7px 0 0 7px!important}
+#hd{left:-18px!important;margin-top:-16px!important}
+.legend{font-size:8px;padding:5px 7px;border-radius:5px}.legend h4{font-size:8.5px;margin:0 0 3px}
+.legend div{gap:4px;margin:2px 0;max-width:155px!important}.legend s{width:17px}
+#bm{border-radius:6px!important}.bb{padding:3px 6px;font-size:8px}}
 </style></head><body>
 <header><div class="brand">ĐỖ XE THÁI NGUYÊN<small>BÃI ĐỖ · CẤM ĐỖ · DỊCH VỤ Ô TÔ</small></div><nav><a class="on">Bản đồ</a></nav></header>
 <div class="app">
@@ -193,7 +203,7 @@ if(R){var rr={};RU.forEach(function(u){rr[u.k]=runsOf(u,R)});PN.forEach(function
 $('dph').onclick=function(){$('dp').classList.toggle('c')};
 $('lg').onclick=function(e){if(e.target.tagName=='H4')this.classList.toggle('c')};
 L.DomEvent.disableClickPropagation($('lg'));
-$('hd').onclick=function(){$('sh').style.top=($('dp').offsetTop+$('dp').offsetHeight/2-23)+'px';document.querySelector('.mapw').classList.add('hid')};
+$('hd').onclick=function(){$('sh').style.top=($('dp').offsetTop+$('dp').offsetHeight/2-$('sh').offsetHeight/2)+'px';document.querySelector('.mapw').classList.add('hid')};
 $('sh').onclick=function(){document.querySelector('.mapw').classList.remove('hid')};
 function zl(){document.querySelector('.mapw').classList.toggle('nolbl',map.getZoom()<16)}map.on('zoomend',zl);zl();setTimeout(function(){map.invalidateSize()},300)})();
 document.querySelector('[data-t=p2]').click();
