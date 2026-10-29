@@ -43,12 +43,16 @@ aside{display:flex;flex-direction:column;min-height:0;background:#fff;border-rig
 table{border-collapse:collapse;width:100%;font-size:12px;margin:6px 0 12px}th,td{border:1px solid #e5e7eb;padding:4px 6px;text-align:left}th{background:#f3f4f6}
 tr.go{cursor:pointer}tr.go:hover{background:#eef5ff}.mu{color:#6b7280;font-size:12px}
 @media(max-width:760px){header{height:46px;padding:0 12px}.brand{font-size:14px}.brand small{font-size:10px}
-.app{grid-template-columns:1fr;grid-template-rows:64vh 1fr}.mapw{order:-1}nav{display:none}#stb{display:none!important}
+.app{display:block;position:relative}.mapw{position:absolute;inset:0}
+aside{position:absolute;left:0;right:0;bottom:0;z-index:600;height:56%;transform:translateY(calc(100% - 44px - env(safe-area-inset-bottom)));transition:transform .3s ease;box-shadow:0 -2px 10px rgba(0,0,0,.25);border-right:0;padding-bottom:env(safe-area-inset-bottom);font-size:12.5px;border-radius:12px 12px 0 0;overflow:hidden}
+aside.open{transform:none}
+.pane.on{display:block;overflow-y:auto}.list{overflow:visible!important;flex:none!important}#rl{max-height:none!important}.it b{font-size:12px}
+.leaflet-bottom{bottom:calc(44px + env(safe-area-inset-bottom))}nav{display:none}#stb{display:none!important}
 #dp{width:auto!important;max-width:calc(100% - 64px)!important;top:8px!important;right:8px!important;padding:6px 8px!important}
 #dp.c .dl{display:none}#dp.c .ds{display:inline!important}#dp.c>*:not(#dph):not(#hd){display:none!important}#dp.c #dph{margin:0}
-.legend{left:8px;bottom:8px;max-width:62%;max-height:38%}
-#bm{right:8px!important;bottom:24px!important}.bb{padding:5px 8px;font-size:11px}
-.leaflet-tooltip.lbl{font-size:9.5px;padding:0 3px}.tabs button{padding:10px 2px;font-size:11px}}
+.legend{left:8px;bottom:calc(66px + env(safe-area-inset-bottom));max-width:62%;max-height:34%}
+#bm{right:8px!important;bottom:calc(66px + env(safe-area-inset-bottom))!important}.bb{padding:5px 8px;font-size:11px}
+.leaflet-tooltip.lbl{font-size:9.5px;padding:0 3px}.tabs{height:44px}.tabs button{height:44px;padding:0;font-size:11px}}
 </style></head><body>
 <header><div class="brand">ĐỖ XE THÁI NGUYÊN<small>BÃI ĐỖ · CẤM ĐỖ · DỊCH VỤ Ô TÔ</small></div><nav><a class="on">Bản đồ</a></nav></header>
 <div class="app">
@@ -63,7 +67,7 @@ tr.go{cursor:pointer}tr.go:hover{background:#eef5ff}.mu{color:#6b7280;font-size:
 <div class="pane" id="p3"><div class="scroll" id="cmp"><div class="mu">Đang chờ dữ liệu OSM…</div></div></div>
 </aside>
 <div class="mapw"><div id="map"></div>
-<button id="sh" aria-label="Hiện các bảng" title="Hiện các bảng">‹</button><div id="bm" style="position:absolute;right:12px;bottom:34px;z-index:500;display:flex;background:#fff;border-radius:8px;box-shadow:0 1px 8px rgba(0,0,0,.3);overflow:hidden"><button data-b="e" class="bb on">Bản đồ đường</button><button data-b="s" class="bb">Vệ tinh</button></div><div id="dp" style="position:absolute;top:12px;right:12px;z-index:500;background:#fff;border-radius:8px;box-shadow:0 1px 8px rgba(0,0,0,.3);padding:8px 10px;font-size:12px;width:250px;max-width:calc(100% - 24px)"><button id="hd" aria-label="Ẩn các bảng" title="Ẩn các bảng">›</button><b id="dph" style="display:block;margin-bottom:6px;color:#0a4d9f;line-height:1.35;cursor:pointer"><span class="dl">Thời điểm đi ra ngoài</span><span class="ds" style="display:none">📅 Thời điểm đi ra ngoài ▾</span></b><div style="display:flex;gap:6px"><input type="date" id="rd" style="flex:1.4;min-width:0;padding:6px;border:1px solid #d9dce1;border-radius:6px;font:inherit"><input type="time" id="rh" style="flex:1;min-width:0;padding:6px;border:1px solid #d9dce1;border-radius:6px;font:inherit"></div><div id="rq" style="margin-top:6px;font-size:12px;color:#444">Đang hiện tất cả lệnh cấm. Chọn ngày để lọc (không chọn giờ = xem cả ngày).</div><button id="dpc" style="margin-top:6px;border:1px solid #d9dce1;background:#f3f4f6;border-radius:6px;padding:4px 10px;cursor:pointer;font:inherit;font-size:12px">Xem tất cả lệnh cấm</button></div><div id="stb" style="position:absolute;left:12px;top:92px;z-index:500;background:#fff;border-radius:6px;padding:6px 10px;box-shadow:0 1px 6px rgba(0,0,0,.25);font-size:11px;max-width:80%"></div><div class="legend" id="lg"><h4>Chú thích</h4><div><s style="border-color:#e8193c"></s>Cấm dừng và đỗ</div><div><s style="border-color:#f08c00"></s>Cấm đỗ xe</div><div><s style="border-color:#2b2d9c"></s>Cấm đỗ ngày chẵn lẻ</div><div><s style="border-top-style:dotted;border-color:#222"></s>Cấm đỗ theo loại xe</div></div></div>
+<button id="sh" aria-label="Hiện các bảng" title="Hiện các bảng">‹</button><div id="bm" style="position:absolute;right:12px;bottom:34px;z-index:500;display:flex;background:#fff;border-radius:8px;box-shadow:0 1px 8px rgba(0,0,0,.3);overflow:hidden"><button data-b="e" class="bb on">Bản đồ đường</button><button data-b="s" class="bb">Vệ tinh</button></div><div id="dp" style="position:absolute;top:12px;right:12px;z-index:500;background:#fff;border-radius:8px;box-shadow:0 1px 8px rgba(0,0,0,.3);padding:8px 10px;font-size:12px;width:250px;max-width:calc(100% - 24px)"><button id="hd" aria-label="Ẩn các bảng" title="Ẩn các bảng">›</button><b id="dph" style="display:block;margin-bottom:6px;color:#0a4d9f;line-height:1.35;cursor:pointer"><span class="dl">Thời điểm đi ra ngoài</span><span class="ds" style="display:none">📅 Thời điểm đi ra ngoài ▾</span></b><div style="display:flex;gap:6px"><input type="date" id="rd" style="flex:1.4;min-width:0;padding:6px;border:1px solid #d9dce1;border-radius:6px;font:inherit"><input type="time" id="rh" style="flex:1;min-width:0;padding:6px;border:1px solid #d9dce1;border-radius:6px;font:inherit"></div><div id="rq" style="margin-top:6px;font-size:12px;color:#444">Đang hiện tất cả lệnh cấm. Chọn ngày để lọc (không chọn giờ = xem cả ngày).</div><button id="dpc" style="margin-top:6px;border:1px solid #d9dce1;background:#f3f4f6;border-radius:6px;padding:4px 10px;cursor:pointer;font:inherit;font-size:12px">Xem tất cả lệnh cấm</button></div><div id="stb" style="position:absolute;left:12px;top:12px;z-index:500;background:#fff;border-radius:6px;padding:6px 10px;box-shadow:0 1px 6px rgba(0,0,0,.25);font-size:11px;max-width:80%"></div><div class="legend" id="lg"><h4>Chú thích</h4><div><s style="border-color:#e8193c"></s>Cấm dừng và đỗ</div><div><s style="border-color:#f08c00"></s>Cấm đỗ xe</div><div><s style="border-color:#2b2d9c"></s>Cấm đỗ ngày chẵn lẻ</div><div><s style="border-top-style:dotted;border-color:#222"></s>Cấm đỗ theo loại xe</div></div></div>
 </div>
 <script>
 var C={park:['Bãi đỗ xe','#0a4d9f','P'],fuel:['Cây xăng','#e8590c','⛽'],ev:['Trạm sạc EV','#2f9e44','⚡'],repair:['Gara / sửa xe','#7048e8','🔧'],show:['Showroom','#c2255c','🚘']};
@@ -74,7 +78,7 @@ var G=[['park','Bãi giữ xe ô tô (32 Chu Văn An)',21.59228,105.82935],['par
 ['repair','Michelin Car Service - Hunter Mai Linh',21.58009,105.84236],['repair','Gara Hunter Mai Linh CS2',21.5798,105.84252],['repair','Garage Ô tô Việt Bắc',21.58457,105.85199],['repair','Gara Diễn Trang',21.58828,105.84257],['repair','Garage Minh Hiếu',21.59191,105.83703],['repair','Gara Thành Tâm',21.57885,105.84369],['repair','Gara Duyên Hải',21.58342,105.84411],['repair','Gara Khánh Duy',21.57917,105.82868],
 ['show','Ford Thái Nguyên',21.56246,105.85498],['show','Toyota Thái Nguyên',21.5605,105.85534],['show','Kia Thái Nguyên',21.58076,105.83636],['show','BMW Thái Nguyên',21.58022,105.8359],['show','Honda Ôtô Thái Nguyên',21.56136,105.85531],['show','Hồng Phương Auto (xe cũ)',21.61029,105.81064],['show','Salon ô tô Tùng Bách (xe cũ)',21.57456,105.80797]];
 var BT={cam_dung_do:['Cấm dừng và đỗ','#e8193c',''],cam_do:['Cấm đỗ xe','#f08c00',''],chan_le:['Cấm đỗ ngày chẵn lẻ','#2b2d9c',''],loai_xe:['Cấm đỗ theo loại xe','#222','4 8']};
-var map=L.map('map',{zoomControl:true}).setView([21.5928,105.8442],14);
+var map=L.map('map',{zoomControl:false}).setView([21.5928,105.8442],14);
 var esri=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Tiles © Esri · Dữ liệu © OpenStreetMap contributors'}).addTo(map);
 var sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Tiles © Esri · Dữ liệu © OpenStreetMap contributors'});
 document.querySelectorAll('.bb').forEach(function(b){b.onclick=function(){var k=b.dataset.b;map.removeLayer(k=='e'?sat:esri);map.addLayer(k=='e'?esri:sat);document.querySelectorAll('.bb').forEach(function(x){x.classList.toggle('on',x==b)})}});
@@ -193,4 +197,8 @@ $('hd').onclick=function(){$('sh').style.top=($('dp').offsetTop+$('dp').offsetHe
 $('sh').onclick=function(){document.querySelector('.mapw').classList.remove('hid')};
 function zl(){document.querySelector('.mapw').classList.toggle('nolbl',map.getZoom()<16)}map.on('zoomend',zl);zl();setTimeout(function(){map.invalidateSize()},300)})();
 document.querySelector('[data-t=p2]').click();
+(function(){var a=document.querySelector('aside'),lt='p2';
+document.querySelectorAll('.tabs button').forEach(function(b){b.addEventListener('click',function(){if(innerWidth>=760)return;var t=b.dataset.t;if(!a.classList.contains('open'))a.classList.add('open');else if(lt==t)a.classList.remove('open');lt=t;setTimeout(function(){map.invalidateSize()},350)})});
+a.addEventListener('click',function(e){if(innerWidth<760&&e.target.closest('.it,tr.go'))a.classList.remove('open')});
+map.on('click',function(){if(innerWidth<760)a.classList.remove('open')})})();
 </script></body></html>
